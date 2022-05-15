@@ -191,9 +191,9 @@ for question 3c we added to current the column of total_cases_per_million.
 Compute the *skewness* and *kurtosis* for this distribution, and explain what they mean about the empirical distribution of the data. 
 ```{r}
 
-histo_deahth
 skewness(current$total_deaths_per_million, na.rm = T)
 histo_deahth<- hist(current$total_deaths_per_million, breaks=30)
+histo_deahth
 kurtosis(current$total_deaths_per_million, na.rm = T)
 
 
@@ -264,10 +264,10 @@ ggplot(box_continent_2, aes(x = date, y= booster_ratio)) +
     a. For each month from January 2020 until March 2022 compute the total number of new cases per million in this month for each country individually (around 230 numbers for each month), and make a boxplot representing the empirical distribution fo these ~230 values. Show the boxplots for all months in one plot together in a chronological order, from left to right.
     
 ```{r}
-month_ds =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" )
-month_ds = month_ds[,c("location", "date", "new_cases_per_million" )]
-month_ds = month_ds %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_cases_per_million_month = sum(new_cases_per_million))
-
+month_ds =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" ) #setting dates
+month_ds = month_ds[,c("location", "date", "new_cases_per_million" )]#subseting
+month_ds = month_ds %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_cases_per_million_month = sum(new_cases_per_million)) # orgenized by month
+#using boxplot func.
 boxplot( new_cases_per_million_month ~ date ,
 data= month_ds,
 main=" Empirical distribution fo these",
@@ -287,10 +287,10 @@ border="orange"
 
     b. Repeat (a.), but this time with the total number of `new_deaths` and `new_vaccinations` for each month (two separate plots). 
 ```{r}
-month_ds_death =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" )
-month_ds_death = month_ds_death[,c("location", "date", "new_deaths" )]
-month_ds_death = month_ds_death %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_deaths_month = sum(new_deaths))
-
+month_ds_death =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" ) #data by date
+month_ds_death = month_ds_death[,c("location", "date", "new_deaths" )] #subseting
+month_ds_death = month_ds_death %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_deaths_month = sum(new_deaths)) #data by month
+#usin box plot func
 boxplot(new_deaths_month ~ date ,
 data= month_ds_death,
 main=" new deaths month dist",
@@ -301,11 +301,10 @@ border="black")
 
 ```
 ```{r}
-month_ds_vacc =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" )
-month_ds_vacc = month_ds_vacc[,c("location", "date", "new_vaccinations" )]
-month_ds_vacc = month_ds_vacc %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_vacc_month = sum(new_vaccinations))
-
-
+month_ds_vacc =  subset(covid_19, date> "2019-12-31" & date < "2022-04-01" ) # setting period of time.
+month_ds_vacc = month_ds_vacc[,c("location", "date", "new_vaccinations" )] #subset
+month_ds_vacc = month_ds_vacc %>% group_by(date= format(as.Date(date),"%y-%m")) %>% group_by(date,location) %>% summarise(new_vacc_month = sum(new_vaccinations)) #organized the data by month.
+#creating box plot func.
 boxplot(new_vacc_month ~ date ,
 data= month_ds_vacc,
 main=" new vacc per month dist",
@@ -327,11 +326,11 @@ WE can see that between MAy to January it was increase in deatts rate in corelat
 This column represents roughly the expected number of people that each case infects, and determines the spread of the disease, with values above (below) one indicating that the disease is spreading (declining).   <br>
 
 ```{r}
-  
+#creating new data and calculate 
 r_case_df = covid_19[,c("location", "date", "new_cases_smoothed_per_million")]
 r_case_df = r_case_df %>% group_by(location) %>% summarise(R_cases = new_cases_smoothed_per_million / lag(new_cases_smoothed_per_million, n=7), date)
 r_case_df$R_cases[is.infinite(r_case_df$R_cases)] = NA
-covid_19$R_cases = r_case_df$R_cases
+covid_19$R_cases = r_case_df$R_cases #saving the column in the main data.
 ```
 
     Plot the `R_cases` value as a function of time for `Israel`, `United Kingdom` and `United States`, and describe the results. <br>
@@ -340,15 +339,15 @@ List in a table the number of days at which the disease was spreading (value abo
 
 ```{r}
 
-
-country_data =  covid_19 [, c("location", "date", "R_cases")] %>%  subset( location == "Israel" |location == "United States"| location == "United Kingdom")
+country_data =  covid_19 [, c("location", "date", "R_cases")] %>%  subset( location == "Israel" |location == "United States"| location == "United Kingdom")# Making a subset for the relevant data.
 ggplot(country_data, aes(x = date, y= R_cases)) + 
   geom_line(aes( color= (location))) 
 
-country_data <- fill(country_data,everything())
+country_data <- fill(country_data,everything()) #gerrid NAS
 
-country_data_2 = country_data %>% group_by(location) %>% filter(R_cases >=1) 
+country_data_2 = country_data %>% group_by(location) %>% filter(R_cases >=1)  #filter r_cases date under 1
 
+#creating values for matrix for 3 countries
 r_isr = length(which(country_data_2$location == "Israel"))
 r_US = length(which(country_data_2$location == "United States"))
 r_UK = length(which(country_data_2$location == "United Kingdom"))
@@ -384,12 +383,12 @@ current %>% top_n(3, total_deaths_per_million) %>% select(location, total_deaths
 ```{r}
 mapCountryData(world_current, nameColumnToPlot = "total_vaccinations_per_hundred")
 
-current %>% top_n(3, total_vaccinations_per_hundred) %>% select(location, total_vaccinations_per_hundred )
+current %>% top_n(3, total_vaccinations_per_hundred) %>% select(location, total_vaccinations_per_hundred )#using topn func
 
 
 mapCountryData(world_current, nameColumnToPlot = "excess_mortality_cumulative_per_million")
 
-current %>% top_n(3, total_vaccinations_per_hundred) %>% select(location, excess_mortality_cumulative_per_million )
+current %>% top_n(3, total_vaccinations_per_hundred) %>% select(location, excess_mortality_cumulative_per_million ) 
 
 ```
 
@@ -405,30 +404,42 @@ The function should return a vector of length $121$ representing these correlati
 ```{r}
 cross_corr <- function(corr_df, country, col1, col2){
   new_vec <- c() #creating new vector for the cross correlations we will calculate
+  filter_var <- corr_df%>%filter(location == country)
   
-  col1 <- as.numeric(as.list(t(corr_df%>%filter(location = country_name[, col1]))))
-  col2 <- as.numeric(as.list(t(corr_df%>%filter(location = country_name[, col2]))))
+  col1 <- as.numeric(as.list(t(filter_var[,col1])))
+  col2 <- as.numeric(as.list(t(filter_var[,col2])))
+  # Defining the columns as Transpose in order to calculate the corr, setting the country for each one.
   for (i in c(-60:60)) {
-    if (i< 0){
-      new_vec <- append(new_vec, cor(col1[(abs(i) + 1):length(col1)], col2[1:length(col1)+i]))
-      
+    
+    if (i< 0){new_vec <- append(new_vec, cor(col1[(abs(i) + 1):length(col1)], col2[1:(length(col1)-abs(i))], use = "pairwise.complete.obs"))}
+    
+    else if (i>=0){new_vec <- append(new_vec, cor(col2[(i+1):length(col1)], col1[1:(length(col1)-i)], use = "pairwise.complete.obs"))}
+    
     }
-    
-    else if (i>=0){
-      new_vec <- append(new_vec, cor(col2[i+1:length(col1)]), col1[1:length(col1)-i])
-    }
-    
-    
-  }
        
   return(new_vec) 
   
 }
+
+World_cross_corr <- cross_corr(covid_19,"World","new_cases_smoothed","new_deaths_smoothed")
+  
 ```
 
 
     b. Use the function from (a.) to compute the cross correlation between the number of `new_cases_smoothed` and `new_deaths_smoothed` for the entire *World*, and plot it as a function of $\Delta_t$. 
 At what time delay is the cross correlation maximized? what is your interpretation of this time-delay? 
+
+```{r}
+
+World_cross_corr <- cross_corr(covid_19,"World","new_cases_smoothed","new_deaths_smoothed")
+
+
+interval <- (c(-60:60))
+
+plot(x=interval,y=World_cross_corr ,xlab = "Delta",ylab = "Cross corr",main = "Cross-Correlation for the world vs.Delta")
+
+```
+
 
 
 9. **Death risk after Covid-19 infection:**
@@ -438,12 +449,12 @@ Plot for each of the six continents and the entire world the `death_rate` as a f
 
 ```{r}
 covid_19$death_rate = ifelse(covid_19$total_cases >0, covid_19$total_deaths / covid_19$total_cases, NA)
-
-box_continent_2 =  covid_19 [, c("location" ,"continent","death_rate", "date")] 
+box_continent_2 =  covid_19 [, c("location" ,"continent","death_rate", "date", "total_deaths","total_cases")] 
 box_continent_2$continent =  ifelse(covid_19$location == "World","World",covid_19$continent)
-box_continent_2 = box_continent_2 %>% filter(continent != "")
+box_continent_2 <- box_continent_2 %>% filter(continent != "") %>% group_by(continent,date) %>% summarise(world_total_rate_d = sum(total_deaths,na.rm = TRUE)/sum(total_cases,na.rm = TRUE))
+box_continent_2 <- box_continent_2 %>% filter(date >= "2021-01-01")
 
-ggplot(box_continent_2, aes(x = date, y= death_rate)) + 
+ggplot(box_continent_2, aes(x = date, y= world_total_rate_d)) + 
   geom_smooth(aes( color= (continent))) 
     
 
@@ -497,98 +508,6 @@ ex_mor_plot
 
 
 
-
-
-
-
-**Solution:**  
-
-1. [Solution text - explanations]
-```{r} 
-# you can modify the settings of the r block. For example:  echo=FALSE, eval = FALSE, cache=TRUE ...
-# Solution code in R: 
-
-# a. Loading the data
-
-# Modifying date
-
-# b. Listing five top dates
-
-```
-[Solution text - description of analysis and results]
-
-
-2. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-3. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-4. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-5. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-6. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-7. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-8. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-9. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-10. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-11. [Solution text - explanations] 
-```{r} 
-# Solution code in R 
-
-```
-[Solution text - description of analysis and results]
-
-<br/><br/>  
 
 
 
